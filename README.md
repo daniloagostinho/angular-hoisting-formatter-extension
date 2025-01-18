@@ -1,5 +1,7 @@
 # Angular Hoisting Formatter
 
+![Demo GIF](https://github.com/extension-work)
+
 **Angular Hoisting Formatter** is an extension designed to help developers reorder methods and variables in Angular components. This avoids issues with hoisting by ensuring that all methods and variables are declared before being referenced in the code.
 
 ## Features
