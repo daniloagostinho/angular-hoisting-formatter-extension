@@ -1,9 +1,7 @@
 {
     "compilerOptions": {
-        "target": "es6",
-        "lib": [
-            "es6"
-        ],
+        "target": "ES2019", // ou "ES2020" ou "ESNext"
+        "lib": ["ES2019", "DOM"], // Adicione "ES2019" na lista de libs
         "module": "commonjs",
         "outDir": "./out",
         "rootDir": "./src",

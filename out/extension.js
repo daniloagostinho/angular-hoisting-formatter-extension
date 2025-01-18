@@ -32,22 +32,14 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.activate = activate;
 exports.deactivate = deactivate;
 const vscode = __importStar(require("vscode"));
 const ts = __importStar(require("typescript"));
+const prettier = __importStar(require("prettier"));
 function activate(context) {
-    const disposable = vscode.commands.registerCommand('extension.reorderHoisting', () => __awaiter(this, void 0, void 0, function* () {
+    const disposable = vscode.commands.registerCommand('extension.reorderHoisting', async () => {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
             vscode.window.showErrorMessage('Nenhum arquivo ativo encontrado.');
@@ -60,12 +52,24 @@ function activate(context) {
         }
         const code = document.getText();
         const updatedCode = reorderCode(code);
+        // Formatar o código com Prettier
+        const formattedCode = prettier.format(updatedCode, {
+            parser: 'typescript',
+            semi: true, // Mantém os pontos e vírgulas
+            singleQuote: true, // Usa aspas simples
+            trailingComma: 'all', // Adiciona vírgulas finais onde possível
+            bracketSpacing: true, // Mantém espaços dentro de objetos
+            tabWidth: 2, // Asegure-se de que a indentação está configurada corretamente
+            useTabs: true,
+        });
         const edit = new vscode.WorkspaceEdit();
         const fullRange = new vscode.Range(document.positionAt(0), document.positionAt(code.length));
-        edit.replace(document.uri, fullRange, updatedCode);
-        yield vscode.workspace.applyEdit(edit);
-        vscode.window.showInformationMessage('Reordenamento concluído com sucesso!');
-    }));
+        // Substituir o código formatado no documento
+        edit.replace(document.uri, fullRange, await formattedCode);
+        // Aplicar o edit no workspace
+        await vscode.workspace.applyEdit(edit);
+        vscode.window.showInformationMessage('Reordenamento e formatação concluídos com sucesso!');
+    });
     context.subscriptions.push(disposable);
 }
 function reorderCode(code) {
@@ -74,14 +78,12 @@ function reorderCode(code) {
     const transformer = (context) => {
         return (rootNode) => {
             function visit(node) {
-                // Reordenar somente dentro de declarações de classe
                 if (ts.isClassDeclaration(node) && node.members) {
                     const orderedMembers = reorderClassMembers(node.members);
                     return ts.factory.updateClassDeclaration(node, node.modifiers, node.name, node.typeParameters, node.heritageClauses, orderedMembers);
                 }
                 return ts.visitEachChild(node, visit, context);
             }
-            // Certifique-se de que o nó retornado é um SourceFile
             return ts.visitEachChild(rootNode, visit, context);
         };
     };
@@ -92,7 +94,6 @@ function reorderCode(code) {
     return resultCode;
 }
 function reorderClassMembers(members) {
-    // Reordenar membros da classe: métodos antes de propriedades
     const methods = [];
     const others = [];
     members.forEach((member) => {
@@ -103,12 +104,12 @@ function reorderClassMembers(members) {
             others.push(member);
         }
     });
-    // Ordenar métodos por nome
     methods.sort((a, b) => {
         const nameA = a.name.getText();
         const nameB = b.name.getText();
         return nameA.localeCompare(nameB);
     });
+    // Retornar os membros reordenados
     return [...others, ...methods];
 }
 function deactivate() { }

@@ -28,6 +28,7 @@
         "typescript": "^5.0.0"
     },
     "devDependencies": {
-        "@types/vscode": "^1.96.0"
+        "@types/vscode": "^1.96.0",
+        "prettier": "^3.4.2"
     }
 }
