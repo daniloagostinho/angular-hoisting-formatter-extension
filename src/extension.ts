@@ -44,7 +44,7 @@ export function activate(context: vscode.ExtensionContext) {
             // Aplicar o edit no workspace
             await vscode.workspace.applyEdit(edit);
 
-            vscode.window.showInformationMessage('Reordenamento e formatação concluídos com sucesso!');
+            // vscode.window.showInformationMessage('Reordenamento e formatação concluídos com sucesso!');
         } catch (error: unknown) {
             if (error instanceof Error) {
                 console.error("Erro ao formatar o código:", error);

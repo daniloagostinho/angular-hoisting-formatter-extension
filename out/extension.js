@@ -69,7 +69,7 @@ function activate(context) {
             edit.replace(document.uri, fullRange, formattedCode);
             // Aplicar o edit no workspace
             await vscode.workspace.applyEdit(edit);
-            vscode.window.showInformationMessage('Reordenamento e formatação concluídos com sucesso!');
+            // vscode.window.showInformationMessage('Reordenamento e formatação concluídos com sucesso!');
         }
         catch (error) {
             if (error instanceof Error) {

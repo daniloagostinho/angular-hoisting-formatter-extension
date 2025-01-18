@@ -1,7 +1,7 @@
 {
     "name": "angular-hoisting-formatter",
     "displayName": "Angular Hoisting Formatter",
-    "description": "Reordena métodos e variáveis em componentes Angular para evitar referências antes de declarações.",
+    "description": "Reorders methods and variables in Angular components to avoid references before declarations.",
     "version": "0.1.0",
     "scripts": {
         "compile": "tsc"
@@ -20,7 +20,7 @@
         "commands": [
             {
                 "command": "extension.reorderHoisting",
-                "title": "Reordenar Métodos e Variáveis (Hoisting)"
+                "title": "Reorder Methods and Variables (Hoisting)"
             }
         ]
     },
@@ -30,5 +30,7 @@
     "devDependencies": {
         "@types/vscode": "^1.96.0",
         "prettier": "^3.4.2"
-    }
+    },
+    "author": "Danilo Agostino",
+    "icon": "images/logo.png"
 }
