@@ -52,23 +52,35 @@ function activate(context) {
         }
         const code = document.getText();
         const updatedCode = reorderCode(code);
-        // Formatar o código com Prettier
-        const formattedCode = prettier.format(updatedCode, {
-            parser: 'typescript',
-            semi: true, // Mantém os pontos e vírgulas
-            singleQuote: true, // Usa aspas simples
-            trailingComma: 'all', // Adiciona vírgulas finais onde possível
-            bracketSpacing: true, // Mantém espaços dentro de objetos
-            tabWidth: 2, // Asegure-se de que a indentação está configurada corretamente
-            useTabs: true,
-        });
-        const edit = new vscode.WorkspaceEdit();
-        const fullRange = new vscode.Range(document.positionAt(0), document.positionAt(code.length));
-        // Substituir o código formatado no documento
-        edit.replace(document.uri, fullRange, await formattedCode);
-        // Aplicar o edit no workspace
-        await vscode.workspace.applyEdit(edit);
-        vscode.window.showInformationMessage('Reordenamento e formatação concluídos com sucesso!');
+        try {
+            // Formatar o código com Prettier
+            const formattedCode = await prettier.format(updatedCode, {
+                parser: 'typescript',
+                semi: true, // Mantém os pontos e vírgulas
+                singleQuote: true, // Usa aspas simples
+                trailingComma: 'all', // Adiciona vírgulas finais onde possível
+                bracketSpacing: true, // Mantém espaços dentro de objetos
+                tabWidth: 2, // Asegure-se de que a indentação está configurada corretamente
+                useTabs: true, // Usar tabulações para indentação
+            });
+            const edit = new vscode.WorkspaceEdit();
+            const fullRange = new vscode.Range(document.positionAt(0), document.positionAt(code.length));
+            // Substituir o código formatado no documento
+            edit.replace(document.uri, fullRange, formattedCode);
+            // Aplicar o edit no workspace
+            await vscode.workspace.applyEdit(edit);
+            vscode.window.showInformationMessage('Reordenamento e formatação concluídos com sucesso!');
+        }
+        catch (error) {
+            if (error instanceof Error) {
+                console.error("Erro ao formatar o código:", error);
+                vscode.window.showErrorMessage(`Erro ao formatar o código: ${error.message}`);
+            }
+            else {
+                console.error("Erro desconhecido:", error);
+                vscode.window.showErrorMessage('Erro desconhecido ao formatar o código.');
+            }
+        }
     });
     context.subscriptions.push(disposable);
 }
