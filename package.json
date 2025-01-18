@@ -32,5 +32,5 @@
         "prettier": "^3.4.2"
     },
     "author": "Danilo Agostino",
-    "icon": "images/logo.png"
+    "icon": "assets/images/logo.png"
 }
