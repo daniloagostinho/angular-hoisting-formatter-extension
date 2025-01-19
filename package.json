@@ -2,10 +2,18 @@
     "name": "angular-hoisting-formatter",
     "displayName": "Angular Hoisting Formatter",
     "description": "Reorders methods and variables in Angular components to avoid references before declarations.",
-    "version": "0.1.6",
+    "version": "0.1.9",
     "publisher": "DaniloAgostinho",
+    "author": "Danilo Agostino",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/daniloagostinho/angular-hoisting-formatter-extension"
+    },
+    "main": "./out/extension.js",
     "scripts": {
-        "compile": "tsc"
+        "compile": "tsc",
+        "package": "vsce package"
     },
     "engines": {
         "vscode": "^1.78.0"
@@ -13,7 +21,6 @@
     "categories": [
         "Programming Languages"
     ],
-    "main": "./out/extension.js",
     "activationEvents": [
         "onCommand:extension.reorderHoisting"
     ],
@@ -21,7 +28,7 @@
         "commands": [
             {
                 "command": "extension.reorderHoisting",
-                "title": "Reorder Methods and Variables (Hoisting)"
+                "title": "Hoisting Formatter"
             }
         ]
     },
@@ -30,13 +37,7 @@
     },
     "devDependencies": {
         "@types/node": "^22.10.7",
-        "@types/vscode": "^1.78.0",
-        "prettier": "^3.4.2"
+        "@types/vscode": "^1.78.0"
     },
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/daniloagostinho/angular-hoisting-formatter-extension"
-    },
-    "author": "Danilo Agostino",
     "icon": "assets/images/logo.png"
 }

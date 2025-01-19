@@ -37,31 +37,26 @@ exports.activate = activate;
 exports.deactivate = deactivate;
 const vscode = __importStar(require("vscode"));
 const ts = __importStar(require("typescript"));
-const prettier = __importStar(require("prettier"));
 function activate(context) {
+    console.log('Extension "Angular Hoisting Formatter" is now active!');
     // Comando principal da extensão
     const disposable = vscode.commands.registerCommand('extension.reorderHoisting', async () => {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
-            vscode.window.showErrorMessage('No active file found.');
+            // vscode.window.showErrorMessage('No active file found.');
             return;
         }
         const document = editor.document;
         if (document.languageId !== 'typescript') {
-            vscode.window.showErrorMessage('This command only works with TypeScript files.');
+            // vscode.window.showErrorMessage('This command only works with TypeScript files.');
             return;
         }
         const code = document.getText();
         const updatedCode = reorderCode(code);
         try {
-            // Detectar se Prettier está instalado
-            const prettierExtension = vscode.extensions.getExtension('esbenp.prettier-vscode');
-            const formattedCode = prettierExtension
-                ? await formatWithPrettier(updatedCode)
-                : updatedCode; // Sem Prettier, retorna o código original atualizado
-            // Atualizar o documento com o código formatado
-            await applyEdits(document, formattedCode);
-            // vscode.window.showInformationMessage('Reordering and formatting completed successfully!');
+            // Atualizar o documento com o código reordenado
+            await applyEdits(document, updatedCode);
+            // vscode.window.showInformationMessage('Reordering completed successfully!');
         }
         catch (error) {
             handleError(error);
@@ -110,35 +105,25 @@ function reorderClassMembers(members) {
     });
     return [...others, ...methods];
 }
-async function formatWithPrettier(code) {
-    const prettierConfig = await prettier.resolveConfig(process.cwd());
-    return prettier.format(code, { ...prettierConfig, parser: 'typescript' });
-}
-async function applyEdits(document, formattedCode) {
+async function applyEdits(document, updatedCode) {
     const edit = new vscode.WorkspaceEdit();
     const fullRange = new vscode.Range(document.positionAt(0), document.positionAt(document.getText().length));
-    edit.replace(document.uri, fullRange, formattedCode);
+    edit.replace(document.uri, fullRange, updatedCode);
     await vscode.workspace.applyEdit(edit);
 }
 function showEnvironmentInfo() {
     const vscodeVersion = vscode.version;
-    const prettierExtension = vscode.extensions.getExtension('esbenp.prettier-vscode');
+    // Exibir as informações, mas sem a parte relacionada ao Prettier
     // vscode.window.showInformationMessage(`Running on VS Code version: ${vscodeVersion}`);
-    if (prettierExtension) {
-        // vscode.window.showInformationMessage('Prettier extension detected.');
-    }
-    else {
-        // vscode.window.showWarningMessage('Prettier extension not detected. Using default formatting.');
-    }
 }
 function handleError(error) {
     if (error instanceof Error) {
         console.error('Error:', error);
-        vscode.window.showErrorMessage(`Error: ${error.message}`);
+        // vscode.window.showErrorMessage(`Error: ${error.message}`);
     }
     else {
         console.error('Unknown error:', error);
-        vscode.window.showErrorMessage('Unknown error occurred.');
+        // vscode.window.showErrorMessage('Unknown error occurred.');
     }
 }
 function deactivate() { }
