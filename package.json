@@ -2,7 +2,7 @@
     "name": "angular-hoisting-formatter",
     "displayName": "Angular Hoisting Formatter",
     "description": "Reorders methods and variables in Angular components to avoid references before declarations.",
-    "version": "0.1.5",
+    "version": "0.1.6",
     "publisher": "DaniloAgostinho",
     "scripts": {
         "compile": "tsc"
@@ -13,10 +13,10 @@
     "categories": [
         "Programming Languages"
     ],
+    "main": "./out/extension.js",
     "activationEvents": [
         "onCommand:extension.reorderHoisting"
     ],
-    "main": "./out/extension.js",
     "contributes": {
         "commands": [
             {
