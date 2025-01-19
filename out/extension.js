@@ -39,54 +39,40 @@ const vscode = __importStar(require("vscode"));
 const ts = __importStar(require("typescript"));
 const prettier = __importStar(require("prettier"));
 function activate(context) {
+    // Comando principal da extensão
     const disposable = vscode.commands.registerCommand('extension.reorderHoisting', async () => {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
-            vscode.window.showErrorMessage('Nenhum arquivo ativo encontrado.');
+            vscode.window.showErrorMessage('No active file found.');
             return;
         }
         const document = editor.document;
         if (document.languageId !== 'typescript') {
-            vscode.window.showErrorMessage('Este comando funciona apenas com arquivos TypeScript.');
+            vscode.window.showErrorMessage('This command only works with TypeScript files.');
             return;
         }
         const code = document.getText();
         const updatedCode = reorderCode(code);
         try {
-            // Formatar o código com Prettier
-            const formattedCode = await prettier.format(updatedCode, {
-                parser: 'typescript',
-                semi: true, // Mantém os pontos e vírgulas
-                singleQuote: true, // Usa aspas simples
-                trailingComma: 'all', // Adiciona vírgulas finais onde possível
-                bracketSpacing: true, // Mantém espaços dentro de objetos
-                tabWidth: 2, // Asegure-se de que a indentação está configurada corretamente
-                useTabs: true, // Usar tabulações para indentação
-            });
-            const edit = new vscode.WorkspaceEdit();
-            const fullRange = new vscode.Range(document.positionAt(0), document.positionAt(code.length));
-            // Substituir o código formatado no documento
-            edit.replace(document.uri, fullRange, formattedCode);
-            // Aplicar o edit no workspace
-            await vscode.workspace.applyEdit(edit);
-            // vscode.window.showInformationMessage('Reordenamento e formatação concluídos com sucesso!');
+            // Detectar se Prettier está instalado
+            const prettierExtension = vscode.extensions.getExtension('esbenp.prettier-vscode');
+            const formattedCode = prettierExtension
+                ? await formatWithPrettier(updatedCode)
+                : updatedCode; // Sem Prettier, retorna o código original atualizado
+            // Atualizar o documento com o código formatado
+            await applyEdits(document, formattedCode);
+            // vscode.window.showInformationMessage('Reordering and formatting completed successfully!');
         }
         catch (error) {
-            if (error instanceof Error) {
-                console.error("Erro ao formatar o código:", error);
-                vscode.window.showErrorMessage(`Erro ao formatar o código: ${error.message}`);
-            }
-            else {
-                console.error("Erro desconhecido:", error);
-                vscode.window.showErrorMessage('Erro desconhecido ao formatar o código.');
-            }
+            handleError(error);
         }
     });
     context.subscriptions.push(disposable);
+    // Exibir informações sobre o ambiente
+    showEnvironmentInfo();
 }
 function reorderCode(code) {
     const sourceFile = ts.createSourceFile('temp.ts', code, ts.ScriptTarget.ESNext, true, ts.ScriptKind.TS);
-    const printer = ts.createPrinter();
     const transformer = (context) => {
         return (rootNode) => {
             function visit(node) {
@@ -101,6 +87,7 @@ function reorderCode(code) {
     };
     const transformed = ts.transform(sourceFile, [transformer]);
     const updatedSourceFile = transformed.transformed[0];
+    const printer = ts.createPrinter();
     const resultCode = printer.printFile(updatedSourceFile);
     transformed.dispose();
     return resultCode;
@@ -121,7 +108,37 @@ function reorderClassMembers(members) {
         const nameB = b.name.getText();
         return nameA.localeCompare(nameB);
     });
-    // Retornar os membros reordenados
     return [...others, ...methods];
+}
+async function formatWithPrettier(code) {
+    const prettierConfig = await prettier.resolveConfig(process.cwd());
+    return prettier.format(code, { ...prettierConfig, parser: 'typescript' });
+}
+async function applyEdits(document, formattedCode) {
+    const edit = new vscode.WorkspaceEdit();
+    const fullRange = new vscode.Range(document.positionAt(0), document.positionAt(document.getText().length));
+    edit.replace(document.uri, fullRange, formattedCode);
+    await vscode.workspace.applyEdit(edit);
+}
+function showEnvironmentInfo() {
+    const vscodeVersion = vscode.version;
+    const prettierExtension = vscode.extensions.getExtension('esbenp.prettier-vscode');
+    // vscode.window.showInformationMessage(`Running on VS Code version: ${vscodeVersion}`);
+    if (prettierExtension) {
+        // vscode.window.showInformationMessage('Prettier extension detected.');
+    }
+    else {
+        // vscode.window.showWarningMessage('Prettier extension not detected. Using default formatting.');
+    }
+}
+function handleError(error) {
+    if (error instanceof Error) {
+        console.error('Error:', error);
+        vscode.window.showErrorMessage(`Error: ${error.message}`);
+    }
+    else {
+        console.error('Unknown error:', error);
+        vscode.window.showErrorMessage('Unknown error occurred.');
+    }
 }
 function deactivate() { }
